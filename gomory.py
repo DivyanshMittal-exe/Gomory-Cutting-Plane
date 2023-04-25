@@ -8,7 +8,8 @@ def tableau_phase1(T,n,m,basis):
         if T[-1,j] >= -tol:
             # optimal solution found
             x = np.zeros(n)
-            x[basis < n] = T[basis < n, -1]
+            # TODO
+            # x[basis < n] = T[basis < n, -1]
             return T,basis, x
         # step 2: select leaving variable
         # T[:-1,-1]/T[:-1,j]
@@ -45,7 +46,7 @@ def tableau_phase2(T,n,m,basis):
         if T[-1,j] >= -tol:
             # optimal solution found
             x = np.zeros(n)
-            x[basis < n] = T[basis < n, -1]
+            x[basis] = T[:-1, -1]
             return T,basis, x
         # step 2: select leaving variable
         # T[:-1,-1]/T[:-1,j]
@@ -90,22 +91,22 @@ def gomory(c, A, b):
         if(b[i] < 0):
             b[i] = -b[i]
             A[i,:] = -A[i,:]
-    
+
     # Phase1
     # Ax + Iy = b
     c_phase1 = np.concatenate((np.zeros(n), np.ones(m)))
     A_phase1 = np.hstack((A, np.eye(m)))
     basis_indices = np.arange(n, n+m)
-    
+
     # Constructing initial tableau
     T = np.zeros((m+1, n+m+1))
     # T[1:, 1:] = A
     # T[1:,0] = b
     # T[0, 1:] = c_phase1 - np.ones(m).T @ A
     # T[0,0] = -np.ones(m) @ b
-    T[:-1, :-1] = A
+    T[:-1, :-1] = A_phase1
     T[0:-1:,-1] = b
-    T[-1, :-1] = c_phase1 - np.ones(m).T @ A
+    T[-1, :-1] = c_phase1 - np.ones(m).T @ A_phase1
     T[-1,-1] = -np.ones(m) @ b
 
     # Solving the initial tableau
@@ -115,16 +116,14 @@ def gomory(c, A, b):
         
         print("F Cost not 0 ")
         return None
-    
-    T_new = np.hstack((T[:,:n],T[:,n+m:]))
+
+    T = np.hstack((T[:,:n],T[:,n+m:]))
     c_b = c[basis_indices]
     T[-1, :-1] = c - c_b @ T[:-1, :-1]
     T[-1,-1] = -c_b @ T[0:-1:,-1]
-    
-    
+
+
     T, basis_indices, x = tableau_phase2(T, n, m, basis_indices)
-    
-    
 
 
 
