@@ -2,6 +2,52 @@ import numpy as np
 
 tol = 1e-7
 
+
+def dual_simplex(T,basis):
+    m,n = T.shape
+    n = n-1
+    m = m-1
+    while True:
+        if np.all(T[:-1,-1] >= -tol):
+            x = np.zeros(n)
+            x[basis] = T[:-1, -1]
+            return T,basis,x
+        
+        for it in range(m):
+            if T[it,-1] < 0:
+                l = it
+                
+                
+                if np.all(T[l,:-1] >= -tol):
+                    return None, None, None
+
+                min_index = -1
+                min_ratio = 1e9
+                for rit in range(n):
+                    if(T[l,rit] < 0):
+                        if T[-1,rit]/abs(T[l,rit]) < min_ratio:
+                            min_index = rit
+                            min_ratio = T[-1,rit]/abs(T[l,rit])
+                            
+                j = min_index
+        
+                if min_index == -1:
+                    # unbounded solution
+                    return None, None,None
+                
+                
+                # step 3: perform pivot
+                basis[l] = j
+                
+                T[l,:] /= T[l,j]
+                for k in range(m+1):
+                    if k != l:
+                        T[k,:] -= T[k,j] * T[l,:]
+                                   
+                break        
+        # j = np.argmin(T[-1,:-1])
+    
+
 def tableau_phase1(T,n,m,basis):
     while True:
         j = np.argmin(T[-1,:-1])
