@@ -171,6 +171,41 @@ def gomory(c, A, b):
 
     T, basis_indices, x = tableau_phase2(T, n, m, basis_indices)
 
+    while True:
+        # Check if solution is all integers
+        flag = 1
+        for it in range(len(x)):
+            if abs(int(x[it]) - x[it]) > tol:
+                flag = 0
+                break
+        if flag:
+            return x[:n_old].astype(int), T[-1.-1]
+        
+        # Add another constraint
+        r = x - np.floor(x)
+        j = np.argmax(r)
+
+        basis_indices = np.hstack((basis_indices, len(x)))
+        b_gomory = T[:-1,-1]
+        b_gomory = np.append(b_gomory, -(x[j] - np.floor(x[j])))
+        A_gomory = T[:-1, :-1]
+        a = np.zeros(n)
+        for it in range(n):
+            if it not in basis_indices and abs(int(x[it]) - x[it]) > tol:
+                a[it] = -(x[it] - np.floor(x[it]))
+        A_gomory = np.vstack([A_gomory, a])
+
+        a = np.zeros(m+1)
+        a[-1] = 1
+        A_gomory = np.hstack((A_gomory, a, b_gomory))
+
+        temp = np.hstack((T[-1, :-1], 0 ,T[-1, -1]))
+        T = np.vstack((A_gomory, temp))
+
+        m += 1
+        n += 1
+
+        T, basis_indices, x = dual_simplex(T, basis_indices)
 
 
 if __name__ == "__main__":
