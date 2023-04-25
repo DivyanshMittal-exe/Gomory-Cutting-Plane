@@ -2,25 +2,79 @@ import numpy as np
 
 tol = 1e-7
 
-def tableau_simplex(T,n,m,basis):
+def tableau_phase1(T,n,m,basis):
     while True:
-        j = np.argmax(T[-1,:-1])
-        if T[-1,j] <= tol:
+        j = np.argmin(T[-1,:-1])
+        if T[-1,j] >= -tol:
             # optimal solution found
             x = np.zeros(n)
             x[basis < n] = T[basis < n, -1]
             return T,basis, x
         # step 2: select leaving variable
-        i = np.argmin(T[:-1,j] / T[:-1,-1]) #Doubt about correctness of this
-        if T[i,j] <= 0:
+        # T[:-1,-1]/T[:-1,j]
+        
+        min_index = -1
+        min_ratio = 1e9
+        for it in range(m):
+            if T[it,j] > 0:
+                if T[it,-1]/T[it,j] < min_ratio:
+                    min_index = it
+                    min_ratio = T[it,-1]/T[it,j] 
+        
+        # i = np.argmin(T[:-1,-1]/T[:-1,j]) #Doubt about correctness of this
+        
+        i = min_index
+        
+        if min_index == -1:
             # unbounded solution
-            return None
+            return None, None,None
+        
+        
         # step 3: perform pivot
         basis[i] = j
+        
         T[i,:] /= T[i,j]
         for k in range(m+1):
             if k != i:
                 T[k,:] -= T[k,j] * T[i,:]
+
+
+def tableau_phase2(T,n,m,basis):
+    while True:
+        j = np.argmin(T[-1,:-1])
+        if T[-1,j] >= -tol:
+            # optimal solution found
+            x = np.zeros(n)
+            x[basis < n] = T[basis < n, -1]
+            return T,basis, x
+        # step 2: select leaving variable
+        # T[:-1,-1]/T[:-1,j]
+        
+        min_index = -1
+        min_ratio = 1e9
+        for it in range(m):
+            if T[it,j] > 0:
+                if T[it,-1]/T[it,j] < min_ratio:
+                    min_index = it
+                    min_ratio = T[it,-1]/T[it,j] 
+        
+        # i = np.argmin(T[:-1,-1]/T[:-1,j]) #Doubt about correctness of this
+        
+        i = min_index
+        
+        if min_index == -1:
+            # unbounded solution
+            return None, None,None
+        
+        
+        # step 3: perform pivot
+        basis[i] = j
+        
+        T[i,:] /= T[i,j]
+        for k in range(m+1):
+            if k != i:
+                T[k,:] -= T[k,j] * T[i,:]
+
 
 def gomory(c, A, b):
     m, n_old = A.shape
@@ -55,10 +109,21 @@ def gomory(c, A, b):
     T[-1,-1] = -np.ones(m) @ b
 
     # Solving the initial tableau
-    T, basis_indices, x = tableau_simplex(T, n, m, basis_indices)
+    T, basis_indices, x = tableau_phase1(T, n, m, basis_indices)
 
+    if(abs(T[-1,-1]) > tol):
+        
+        print("F Cost not 0 ")
+        return None
     
-
+    T_new = np.hstack((T[:,:n],T[:,n+m:]))
+    c_b = c[basis_indices]
+    T[-1, :-1] = c - c_b @ T[:-1, :-1]
+    T[-1,-1] = -c_b @ T[0:-1:,-1]
+    
+    
+    T, basis_indices, x = tableau_phase2(T, n, m, basis_indices)
+    
     
 
 
