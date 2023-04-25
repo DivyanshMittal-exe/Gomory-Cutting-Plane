@@ -4,6 +4,7 @@ tol = 1e-7
 
 
 def dual_simplex(T,basis):
+    print("Entered Dual Simplex")
     m,n = T.shape
     n = n-1
     m = m-1
@@ -47,6 +48,7 @@ def dual_simplex(T,basis):
                 break        
         # j = np.argmin(T[-1,:-1])
     
+
 
 def tableau_phase1(T,n,m,basis):
     while True:
@@ -123,6 +125,7 @@ def tableau_phase2(T,n,m,basis):
                 T[k,:] -= T[k,j] * T[i,:]
 
 
+
 def gomory(c, A, b):
     m, n_old = A.shape
     n = n_old + m
@@ -161,7 +164,6 @@ def gomory(c, A, b):
     if(abs(T[-1,-1]) > tol):
         
         print("F Cost not 0 ")
-        return None
 
     T = np.hstack((T[:,:n],T[:,n+m:]))
     c_b = c[basis_indices]
@@ -171,41 +173,60 @@ def gomory(c, A, b):
 
     T, basis_indices, x = tableau_phase2(T, n, m, basis_indices)
 
+    print(T)
+
     while True:
         # Check if solution is all integers
+        x = np.round(x, 5)
+        T = np.round(T, 5)
         flag = 1
+        if  x is None:
+            print("fat gaya")
+            return None
         for it in range(len(x)):
             if abs(int(x[it]) - x[it]) > tol:
                 flag = 0
                 break
         if flag:
-            return x[:n_old].astype(int), T[-1.-1]
+            print (x[:n_old].astype(int))
+            print(T[-1,-1])
+            return x[:n_old].astype(int)
         
         # Add another constraint
-        r = x - np.floor(x)
-        j = np.argmax(r)
+        for it in range(m):
+            if abs(int(T[it,-1]) - T[it,-1]) > tol:
+                j = it
+
+        print("Taking j ", j)
 
         basis_indices = np.hstack((basis_indices, len(x)))
         b_gomory = T[:-1,-1]
-        b_gomory = np.append(b_gomory, -(x[j] - np.floor(x[j])))
+        b_gomory = np.append(b_gomory, -(T[j,-1] - np.floor(T[j,-1])))
         A_gomory = T[:-1, :-1]
         a = np.zeros(n)
+        tmp = T[j, :-1]
         for it in range(n):
-            if it not in basis_indices and abs(int(x[it]) - x[it]) > tol:
-                a[it] = -(x[it] - np.floor(x[it]))
+            if it not in basis_indices and abs(int(tmp[it]) - tmp[it]) > tol:
+                a[it] = -(tmp[it] - np.floor(tmp[it]))
         A_gomory = np.vstack([A_gomory, a])
 
         a = np.zeros(m+1)
         a[-1] = 1
-        A_gomory = np.hstack((A_gomory, a, b_gomory))
+        A_gomory = np.hstack((A_gomory, np.array([a]).T, np.array([b_gomory]).T))
 
         temp = np.hstack((T[-1, :-1], 0 ,T[-1, -1]))
         T = np.vstack((A_gomory, temp))
+        print(T)
+        print("Basis",basis_indices)
 
         m += 1
         n += 1
 
         T, basis_indices, x = dual_simplex(T, basis_indices)
+        print("After Dual")
+        print(basis_indices)
+        print(T)
+        print(x)
 
 
 if __name__ == "__main__":
