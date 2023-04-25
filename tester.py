@@ -22,7 +22,7 @@ class TestLinearProgramming(unittest.TestCase):
             c = np.random.randint(-1000, 1001, size=n)
 
 
-            # our_out = gomory(c, A, b)
+            our_out = gomory(c, A, b)
 
             int_constraint = [1] * n
             lin_prog_solve = linprog(-c, A_ub=A, b_ub=b, method='highs', integrality=int_constraint)
@@ -34,9 +34,9 @@ class TestLinearProgramming(unittest.TestCase):
         
         lin_prog_solve = [int(i) for i in lin_prog_solve.x]
         print(lin_prog_solve)
-        # np.testing.assert_allclose(lin_prog_solve.x, our_out, rtol=1e-9)
+        np.testing.assert_allclose(lin_prog_solve.x, our_out, rtol=1e-9)
 
-        self.assertTrue(False)
+        # self.assertTrue(False)
         # self.assertTrue(np.array_equal(lin_prog_solve.x, our_out))
 
 
