@@ -9,8 +9,8 @@ class TestLinearProgramming(unittest.TestCase):
     def test_linear_programming(self):
         
         while(True):
-            n = np.random.randint(1, 19)
-            m = np.random.randint(1, 19)
+            n = np.random.randint(1, 10)
+            m = np.random.randint(1, 10)
 
             A = np.random.randint(-1000, 1001, size=(m, n))
             

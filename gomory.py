@@ -185,6 +185,26 @@ def gomory(c, A, b):
     # Solving the initial tableau
     T, basis_indices, x = tableau_phase1(T, n, m, basis_indices)
     
+    x_only_basis = T[:-1,-1]
+    
+    x_correct = np.zeros(n)
+    x_correct[basis_indices] = x_only_basis
+    
+    if np.allclose(np.dot(A, x_correct), b) and np.all(x >= 0):  
+        print("IBFS is Correct")
+
+    
+    T = np.round(T,2)
+    np.set_printoptions(suppress=True)
+    np.set_printoptions(linewidth=np.inf)
+
+
+    
+    print(n,m)
+    print(T)
+    
+    print(basis_indices)
+    # return None
     m = len(basis_indices)    
 
     if(abs(T[-1,-1]) > tol):
@@ -200,6 +220,7 @@ def gomory(c, A, b):
 
     T, basis_indices, x = tableau_phase2(T, n, m, basis_indices)
 
+    return None
     print(T)
 
     while True:
