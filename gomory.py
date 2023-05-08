@@ -116,6 +116,11 @@ def tableau_phase2(T,n,m,basis):
     iters = -1
     while True:
         iters+=1
+        
+        print("Us")
+        print(np.round(T,2))
+        print(basis)
+        
         j = np.argmin(T[-1,:-1])
         if T[-1,j] >= -tol:
             # optimal solution found
@@ -124,6 +129,8 @@ def tableau_phase2(T,n,m,basis):
             return T,basis, x
         # step 2: select leaving variable
         # T[:-1,-1]/T[:-1,j]
+        
+        
         
         min_index = -1
         min_ratio = 1e9
@@ -199,12 +206,12 @@ def gomory(c, A, b):
         print("IBFS is Correct")
 
     
-    T = np.round(T,2)
+    T_p = np.round(T,2)
     np.set_printoptions(suppress=True)
     np.set_printoptions(linewidth=np.inf)
 
 
-    print("Initial Tableu\n", T)
+    print("Initial Tableu\n", T_p)
     
     
     print(basis_indices)

@@ -22,7 +22,7 @@ class TestLinearProgramming(unittest.TestCase):
             c = np.random.randint(-1000, 1001, size=n)
 
 
-            lin_prog_solve = linprog(-c, A_ub=A, b_ub=b)
+            lin_prog_solve = linprog(-c, A_ub=A, b_ub=b,method="simplex")
             if lin_prog_solve.x is None:
                 continue
             our_out = gomory(c, A, b)
