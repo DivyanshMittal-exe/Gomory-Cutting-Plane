@@ -52,7 +52,7 @@ def dual_simplex(T,basis):
 
 def tableau_phase1(T,n,m,basis):
     # while True:
-    for _ in range(1000):
+    while True:
         j = np.argmin(T[-1,:-1])
         if T[-1,j] >= -tol:
             # optimal solution found
@@ -113,7 +113,9 @@ def tableau_phase1(T,n,m,basis):
 
 
 def tableau_phase2(T,n,m,basis):
-    for _ in range(1000):
+    iters = -1
+    while True:
+        iters+=1
         j = np.argmin(T[-1,:-1])
         if T[-1,j] >= -tol:
             # optimal solution found
@@ -134,8 +136,11 @@ def tableau_phase2(T,n,m,basis):
         # i = np.argmin(T[:-1,-1]/T[:-1,j]) #Doubt about correctness of this
         
         i = min_index
-        
+        # print("Basis", basis)
+        # print("Ghapla original", "number of iters",iters,'\n', T)
         if min_index == -1:
+            print("Basis", basis)
+            print("Ghapla original", "number of iters",iters,'\n', T)
             # unbounded solution
             return None, None,None
         
@@ -199,9 +204,8 @@ def gomory(c, A, b):
     np.set_printoptions(linewidth=np.inf)
 
 
+    print("Initial Tableu\n", T)
     
-    print(n,m)
-    print(T)
     
     print(basis_indices)
     # return None
@@ -212,13 +216,23 @@ def gomory(c, A, b):
         print("F Cost not 0 ")
         pass
     
-    T = np.hstack((T[:,:n],T[:,n+m:]))
+    T = np.hstack((T[:,:n],T[:,-1:]))
     c_b = c[basis_indices]
     T[-1, :-1] = c - c_b @ T[:-1, :-1]
     T[-1,-1] = -c_b @ T[0:-1:,-1]
 
+    print(n,m)
+    print("Pre Phase 2 Tableau\n", T)
 
     T, basis_indices, x = tableau_phase2(T, n, m, basis_indices)
+    if(T is None):
+        print("Ghapla")
+    x_only_basis = T[:-1,-1]
+    
+    x_correct = np.zeros(n)
+    x_correct[basis_indices] = x_only_basis
+
+    return x_correct[:n_old]
 
     return None
     print(T)
