@@ -15,10 +15,10 @@ class TestLinearProgramming(unittest.TestCase):
             A = np.random.randint(-1000, 1001, size=(m, n))
             
             # I do not know what this line does
-            # b = np.random.randint(np.amax(A, axis=1), 1001, size=m)
+            b = np.random.randint(np.amax(A, axis=1), 1001, size=m)
 
             
-            b = np.random.randint(-1000, 1001, size=m)
+            # b = np.random.randint(-1000, 1001, size=m)
             c = np.random.randint(-1000, 1001, size=n)
 
 
@@ -30,9 +30,9 @@ class TestLinearProgramming(unittest.TestCase):
             if lin_prog_solve.x is not None:
                 break
         
-        print(lin_prog_solve)
+        print(our_out)
         
-        lin_prog_solve = [int(i) for i in lin_prog_solve.x]
+        # lin_prog_solve = [int(i) for i in lin_prog_solve.x]
         print(lin_prog_solve)
         np.testing.assert_allclose(lin_prog_solve.x, our_out, rtol=1e-9)
 

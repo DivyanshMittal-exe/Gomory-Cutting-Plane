@@ -51,13 +51,37 @@ def dual_simplex(T,basis):
 
 
 def tableau_phase1(T,n,m,basis):
-    while True:
+    # while True:
+    for _ in range(1000):
         j = np.argmin(T[-1,:-1])
         if T[-1,j] >= -tol:
             # optimal solution found
             x = np.zeros(n)
-            # TODO
-            # x[basis < n] = T[basis < n, -1]
+            
+            to_remove_rows = []
+            
+            # Removing slack variables
+            for base_id,basis_it in enumerate(basis):
+                if basis_it >= n:
+                    for remover in range(n):
+                        if abs(T[base_id,remover]) > tol:
+                            basis[base_id] = remover
+                            T[base_id,:] /= T[base_id,remover]
+                            for k in range(m+1):
+                                if k != base_id:
+                                    T[k,:] -= T[k,remover] * T[base_id,:]
+                            break
+                    else:
+                        to_remove_rows.append(base_id)
+                             
+            T = np.delete(T,to_remove_rows,0)
+            basis = np.delete(basis,to_remove_rows)
+
+            if len(to_remove_rows):
+                print(f"Removing redundant rows {to_remove_rows}")
+                pass
+                
+
             return T,basis, x
         # step 2: select leaving variable
         # T[:-1,-1]/T[:-1,j]
@@ -89,7 +113,7 @@ def tableau_phase1(T,n,m,basis):
 
 
 def tableau_phase2(T,n,m,basis):
-    while True:
+    for _ in range(1000):
         j = np.argmin(T[-1,:-1])
         if T[-1,j] >= -tol:
             # optimal solution found
@@ -160,11 +184,14 @@ def gomory(c, A, b):
 
     # Solving the initial tableau
     T, basis_indices, x = tableau_phase1(T, n, m, basis_indices)
+    
+    m = len(basis_indices)    
 
     if(abs(T[-1,-1]) > tol):
         
         print("F Cost not 0 ")
-
+        pass
+    
     T = np.hstack((T[:,:n],T[:,n+m:]))
     c_b = c[basis_indices]
     T[-1, :-1] = c - c_b @ T[:-1, :-1]
@@ -177,6 +204,7 @@ def gomory(c, A, b):
 
     while True:
         # Check if solution is all integers
+        print(x)
         x = np.round(x, 5)
         T = np.round(T, 5)
         flag = 1
