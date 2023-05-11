@@ -20,6 +20,8 @@ def dual_simplex(T,basis):
                 
                 
                 if np.all(T[l,:-1] >= -tol):
+                    print("All pos solution")
+                    
                     return None, None, None
 
                 min_index = -1
@@ -33,7 +35,7 @@ def dual_simplex(T,basis):
                 j = min_index
         
                 if min_index == -1:
-                    # unbounded solution
+                    print("unbounded solution")
                     return None, None,None
                 
                 
@@ -162,7 +164,7 @@ def tableau_phase2(T,n,m,basis):
 
 
 
-def gomory(c, A, b):
+def gomory_cab(c, A, b):
     m, n_old = A.shape
     n = n_old + m
     # Converting to standard form Ax = b
@@ -239,32 +241,33 @@ def gomory(c, A, b):
     x_correct = np.zeros(n)
     x_correct[basis_indices] = x_only_basis
 
-    return x_correct[:n_old]
+    # return x_correct[:n_old]
 
-    return None
+    # return None
     print(T)
 
     while True:
         # Check if solution is all integers
         print(x)
-        x = np.round(x, 5)
-        T = np.round(T, 5)
+        # x = np.round(x, 5)
+        # T = np.round(T, 5)
         flag = 1
         if  x is None:
             print("fat gaya")
             return None
         for it in range(len(x)):
-            if abs(int(x[it]) - x[it]) > tol:
+            if abs(round(x[it]) - x[it]) > tol:
+                print(f"Here is the culprit:{it} {x[it]} {int(x[it])} {round(x[it])} ")
                 flag = 0
                 break
         if flag:
-            print (x[:n_old].astype(int))
+            print (np.round(x[:n_old]))
             print(T[-1,-1])
-            return x[:n_old].astype(int)
+            return np.round(x[:n_old])
         
         # Add another constraint
         for it in range(m):
-            if abs(int(T[it,-1]) - T[it,-1]) > tol:
+            if abs(round(T[it,-1]) - T[it,-1]) > tol:
                 j = it
 
         print("Taking j ", j)
@@ -276,7 +279,7 @@ def gomory(c, A, b):
         a = np.zeros(n)
         tmp = T[j, :-1]
         for it in range(n):
-            if it not in basis_indices and abs(int(tmp[it]) - tmp[it]) > tol:
+            if it not in basis_indices and abs(round(tmp[it]) - tmp[it]) > tol:
                 a[it] = -(tmp[it] - np.floor(tmp[it]))
         A_gomory = np.vstack([A_gomory, a])
 
@@ -299,6 +302,38 @@ def gomory(c, A, b):
         print(x)
 
 
+def gomory(filename):
+    with open(filename, 'r') as file:
+        # Read the first line
+        line = file.readline().strip().split()
+        n, m = int(line[0]), int(line[1])
+
+        # Read the second line
+        line = file.readline().strip().split()
+        b = np.array([int(num) for num in line])
+
+        # Read the third line
+        line = file.readline().strip().split()
+        c = np.array([int(num) for num in line])
+
+        # Read the remaining lines
+        A = np.empty((m, n))
+        for i in range(m):
+            line = file.readline().strip().split()
+            row = np.array([int(num) for num in line])
+            A[i, :] = row
+
+        print(A)
+        print(b)
+        print(c)
+        print()
+        print()
+        print()
+        print()
+        
+        return gomory_cab(c,A,b)
+            # a.append(row)
+    
 if __name__ == "__main__":
 
     n, m = map(int, input().split())
@@ -310,4 +345,4 @@ if __name__ == "__main__":
         row = np.array(list(map(int, input().split())))
         A[i, :] = row
 
-    print(gomory(c,A,b))
+    print(gomory_cab(c,A,b))
