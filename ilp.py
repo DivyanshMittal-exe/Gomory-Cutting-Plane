@@ -1,6 +1,19 @@
 import numpy as np
 
-tol = 1e-7
+tol = 1e-9
+
+def lexo_smaller(array1, array2):
+    Have_changed = False
+    for i in range(len(array1)):
+        if array1[i] < array2[i]:
+            lexicographically_smaller_array = array1
+            break
+        elif array1[i] > array2[i]:
+            Have_changed = True
+            lexicographically_smaller_array = array2
+            break
+    
+    return lexicographically_smaller_array,Have_changed
 
 
 def dual_simplex(T,basis):
@@ -20,21 +33,29 @@ def dual_simplex(T,basis):
                 
                 
                 if np.all(T[l,:-1] >= -tol):
+                    print(np.round(T,3))
+                    print(np.round(T[l,:-1],3))
                     print("All pos solution")
                     
                     return None, None, None
 
                 min_index = -1
                 min_ratio = 1e9
+                min_array = np.array([1e9]*(m+1))
                 for rit in range(n):
                     if(T[l,rit] < 0):
-                        if T[-1,rit]/abs(T[l,rit]) < min_ratio:
+                        min_array, has_change = lexo_smaller(min_array,np.hstack((T[-1,rit],T[:-1,rit]))/T[l,rit])
+                        if has_change:
                             min_index = rit
-                            min_ratio = T[-1,rit]/abs(T[l,rit])
+                            
+                        # if T[-1,rit]/abs(T[l,rit]) < min_ratio:
+                        #     min_index = rit
+                        #     min_ratio = T[-1,rit]/abs(T[l,rit])
                             
                 j = min_index
         
                 if min_index == -1:
+                    print(np.round(T,3))
                     print("unbounded solution")
                     return None, None,None
                 
@@ -269,10 +290,17 @@ def gomory_cab(c, A, b):
             return np.round(x[:n_old])
         
         # Add another constraint
+        max_frac = 0
+        max_it = -1
         for it in range(m):
             if abs(round(T[it,-1]) - T[it,-1]) > tol:
                 j = it
-
+                if T[it,-1] - np.floor(T[it,-1]) > max_frac:
+                    max_frac =  T[it,-1] - np.floor(T[it,-1])
+                    max_it = it
+                break
+            
+        j = max_it
         print("Taking j ", j)
 
         basis_indices = np.hstack((basis_indices, len(x)))
@@ -292,7 +320,7 @@ def gomory_cab(c, A, b):
 
         temp = np.hstack((T[-1, :-1], 0 ,T[-1, -1]))
         T = np.vstack((A_gomory, temp))
-        print(T)
+        print(np.round(T,3))
         print("Basis",basis_indices)
 
         m += 1
@@ -301,7 +329,7 @@ def gomory_cab(c, A, b):
         T, basis_indices, x = dual_simplex(T, basis_indices)
         print("After Dual")
         print(basis_indices)
-        print(T)
+        print(np.round(T,3))
         print(x)
 
 

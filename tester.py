@@ -27,7 +27,13 @@ class TestLinearProgramming(unittest.TestCase):
             lin_prog_solve = linprog(-c, A_ub=A, b_ub=b,method="highs",integrality=int_constraint)
             if lin_prog_solve.x is None:
                 continue
+            
+            print(lin_prog_solve)
+            # return
             our_out = gomory_cab(c, A, b)
+            
+            print(lin_prog_solve)
+            
 
             int_constraint = [1] * n
             
