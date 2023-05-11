@@ -44,7 +44,7 @@ def dual_simplex(T,basis):
                 min_array = np.array([1e9]*(m+1))
                 for rit in range(n):
                     if(T[l,rit] < 0):
-                        min_array, has_change = lexo_smaller(min_array,np.hstack((T[-1,rit],T[:-1,rit]))/T[l,rit])
+                        min_array, has_change = lexo_smaller(min_array,np.hstack((T[-1,rit],T[:-1,rit]))/abs(T[l,rit]))
                         if has_change:
                             min_index = rit
                             
